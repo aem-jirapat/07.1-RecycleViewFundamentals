@@ -56,6 +56,9 @@ class SleepTrackerFragment : Fragment() {
 
         val application = requireNotNull(this.activity).application
 
+        val adapter = SleepNightAdapter()
+        binding.sleepList.adapter = adapter
+
         // Create an instance of the ViewModel Factory.
         val dataSource = SleepDatabase.getInstance(application).sleepDatabaseDao
         val viewModelFactory = SleepTrackerViewModelFactory(dataSource, application)
@@ -87,9 +90,14 @@ class SleepTrackerFragment : Fragment() {
                 sleepTrackerViewModel.doneShowingSnackbar()
             }
         })
+        sleepTrackerViewModel.nights.observe(viewLifecycleOwner, Observer {
+            it?.let {
+                adapter.data = it
+            }
+        })
 
         // Add an Observer on the state variable for Navigating when STOP button is pressed.
-        sleepTrackerViewModel.navigateToSleepQuality.observe(this, Observer { night ->
+        sleepTrackerViewModel.navigateToSleepQuality.observe(viewLifecycleOwner, Observer { night ->
             night?.let {
                 // We need to get the navController from this, because button is not ready, and it
                 // just has to be a view. For some reason, this only matters if we hit stop again
